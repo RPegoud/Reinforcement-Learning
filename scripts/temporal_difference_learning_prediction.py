@@ -83,7 +83,7 @@ class TD_Agent(Agent):
             self.values[s] = self.values[s] + self.alpha*(reward - self.values[s])
 
     def play_episode(self):
-        s = self.reset()
+        s = self.reset() # initial state
         while True:
             s, s_prime, action = self.step()
             reward = self.env.nodes.get(s)[action]
@@ -91,6 +91,37 @@ class TD_Agent(Agent):
             if self.done:
                 break
             s = s_prime
+
+class MC_Agent(Agent):
+    def __init__(self, alpha:float, gamma:float) -> None:
+        self.alpha = alpha
+        self.gamma = gamma
+        self.returns = []
+        super().__init__()
+
+    def update_value():
+        """
+        Update the values according to every-visit Monte Carlo
+        """
+        pass
+
+    def play_episode(self):
+        s = self.reset() # initial state
+        G = 0 # initial estimated return
+        episode = {
+            'states' : [s],
+            'actions' : [],
+            'rewards' : [],
+        }
+        while True:
+            s, s_prime, action = self.step()
+            episode['states'].append(s_prime)
+            episode['actions'].append(action)
+            reward = self.env.nodes.get(s)[action]
+            episode['rewards'].append(reward)
+            if self.done:
+                break
+        
 
 def get_runs(alphas, n_runs=10, n_episodes=100):
     """
