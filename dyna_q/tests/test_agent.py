@@ -45,10 +45,24 @@ def test_update_state_movement():
     assert a.update_state(110, 0) == 110
     assert a.update_state(110, 1) == 110
     # test normal movement in the center of the grid
-    assert a.update_state(35, 0) == 34
-    assert a.update_state(35, 1) == 45
-    assert a.update_state(35, 2) == 36
-    assert a.update_state(35, 3) == 25
+    assert a.update_state(53, 0) == 52
+    assert a.update_state(53, 1) == 63
+    assert a.update_state(45, 2) == 46
+    assert a.update_state(64, 3) == 54
+    # test wall collision
+    assert a.update_state(24, 0) == 24
+    assert a.update_state(26, 1) == 26
+    assert a.update_state(34, 2) == 34
+    assert a.update_state(46, 3) == 46
+    # test termination on reaching the goal
+    assert a.done == False
+    a.update_state(91, 1)
+    assert a.done == True
+    # test termination on wholes
+    a.done = False
+    assert a.done == False
+    a.update_state(72, 1)
+    assert a.done == True
 
 def test_epsilon_greedy_selection():
     """
@@ -104,12 +118,10 @@ def test_agent_start_step_stop():
     # ----------------
     # test agent step
     # ----------------
-    action = a.step(1,2)
+    action = a.step(a.position, a.env.get_reward(a.state_to_coord(a.position)))
     assert action == 1
-    action = a.step(0,1)
-    assert action == 0
+    assert a.position == 6
 
     expected_model = {
         61: {3: (1,2)},
-        
     }

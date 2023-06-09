@@ -18,7 +18,8 @@ class Agent():
         self.last_action = -1
         self.last_state = -1
         self.n_states = self.env.grid.size
-        self.start_position = self.coord_to_state(self.env.coordinates.get('A')[0])
+        self.start_position = self.coord_to_state(list(reversed(self.env.coordinates.get('A')[0])))
+        self.position = self.start_position
         self.q_values = self.init_q_values()
         self.model = {} # model[state][action] = (new state, reward)
         self.random_generator = np.random.RandomState(seed=17)
@@ -48,7 +49,12 @@ class Agent():
             self.model[last_state] = {}
             self.model[last_state][last_action] = (state, reward)
 
-    def update_coord(self, coord, action):
+    def update_coord(self, coord:tuple, action:int) -> tuple:
+        """
+        Given a state and an action, moves the agent on the grid
+        If the agent encounters a wall or the edge of the grid, the initial position is returned
+        If the agent falls into a whole ('T') or finds the goal ('G'), the episode ends
+        """
         assert action in [0,1,2,3], f"Invalid action {action}"
         x,y = coord
         if action == 0:
@@ -62,18 +68,29 @@ class Agent():
 
         # if the action moves the agent out of bounds
         if x not in range(0, self.env.grid.shape[1]):
-            print(f'x out of bounds: {x} : {self.env.grid.shape[1]}')
             return coord
         if y not in range(0, self.env.grid.shape[0]):
-            print(f'y out of bounds: {y} : {self.env.grid.shape[0]}')
             return coord
+
+        # /!\ when parsing the dataframe x and y are reversed
+        # if the agent bumps into a wall
+        if self.env.grid.loc[y,x] == 'W':
+            print('W')
+            return coord
+        # if the agent encounter a terminal state
+        if self.env.grid.loc[y,x] in ['T', 'G']:
+            self.done = True
+
+        self.position == (x,y)
         return (x,y)
     
     def update_state(self, state, action):
         assert action in [0,1,2,3], f"Invalid action {action}"
         coord = self.state_to_coord(state)
         updated_coord = self.update_coord(coord, action)
-        return self.coord_to_state(updated_coord)
+        updated_state = self.coord_to_state(updated_coord)
+        self.position = updated_state
+        return updated_state
     
     def argmax(self, q_values) -> int:
         """
@@ -106,8 +123,6 @@ class Agent():
             planning_action = self.random_generator.choice(list(self.model[planning_state].keys()))
             # get the predicted next state and reward
             next_state, reward = self.model[planning_state][planning_action]
-            # update the values in case of non-terminal state
-
             # update the values in case of terminal state
             if next_state == -1:
                 update = self.q_values[planning_state][planning_action]
@@ -126,10 +141,11 @@ class Agent():
         """
         self.past_state = state
         self.past_action = self.epsilon_greedy(state)
-        
+        # take the action
+        self.update_state(state, self.past_action)
         return self.past_action
     
-    def step(self, state:int, reward:int, ):
+    def step(self, state:int, reward:int):
         # direct RL update
         update = self.q_values[self.past_state][self.past_action]
         update += self.step_size * (reward + self.gamma * np.max(self.q_values[state]) - update)
@@ -140,18 +156,22 @@ class Agent():
         self.planning_step()
         # action selection using the e-greedy policy
         action = self.epsilon_greedy(state)
+        self.update_state(state, action)
         # before performing the action, save the current state and action
         self.past_state = state
         self.past_action = action
 
         return self.past_action
     
-    def agent_end(self, reward:int):
+    def agent_end(self):
         """
         Called once the agent reaches a terminal state 
         """
+        terminal_coordinates = self.state_to_coord(self.position)
+        # the coordinates must be reversed when querying the dataframe
+        reward = self.env.get_reward(terminal_coordinates[::-1]) 
         # direct RL update for a terminal state
-        update = self.q_values[self.past_state, self.past_action]
+        update = self.q_values[self.past_state][self.past_action]
         update += self.step_size * (reward - update)
         self.q_values[self.past_state, self.past_action] = update
         # model update with next_action = -1
