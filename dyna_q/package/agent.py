@@ -68,6 +68,7 @@ class Agent():
             return coord
         # if the agent goes through the portal
         if self.env.grid.loc[y, x] == 'P':
+            print('P')
             return (11, 0)
         # if the agent encounters a terminal state (whole or goal)
         if self.env.grid.loc[y, x] in ['T', 'G']:

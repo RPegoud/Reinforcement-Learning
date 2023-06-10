@@ -73,12 +73,21 @@ class Dyna_Q_Agent(Agent):
         """
         terminal_coordinates = self.state_to_coord(self.position)
         # the coordinates must be reversed when querying the dataframe
-        reward = self.env.get_reward(terminal_coordinates[::-1])
+        reward = self.env.get_reward(terminal_coordinates)
         # direct RL update for a terminal state
         update = self.q_values[self.past_state][self.past_action]
         update += self.step_size * (reward - update)
-        self.q_values[self.past_state, self.past_action] = update
+        self.q_values[self.past_state][self.past_action] = update
         # model update with next_action = -1
         self.update_model(self.past_state, self.past_action, -1, reward)
         # planning step
         self.planning_step()
+    
+    def play_episode(self):
+        self.agent_start(self.start_position)
+        while not self.done:
+            print((self.position, self.state_to_coord(self.position)))
+            action = self.step(self.position, 
+                    self.env.get_reward(self.state_to_coord(self.position)))
+            print(action)
+        self.agent_end()
