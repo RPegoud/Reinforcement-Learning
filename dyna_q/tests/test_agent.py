@@ -1,4 +1,4 @@
-from package import Agent, Dyna_Q_Agent, Env
+from package import Agent, Dyna_Q_Agent
 import numpy as np
 
 def test_agent_update_model():
