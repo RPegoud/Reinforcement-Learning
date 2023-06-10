@@ -1,8 +1,8 @@
-from package import Agent, Env
+from package import Agent, Dyna_Q_Agent, Env
 import numpy as np
 
 def test_agent_update_model():
-    a = Agent()
+    a = Dyna_Q_Agent()
     a.update_model(6,1,7,0)
     a.update_model(11,3,10,0)
     a.update_model(111,0, 110, 1)
@@ -82,7 +82,7 @@ def test_agent_start():
     assert past_action == 2
 
 def test_planning_step():
-    a = Agent(planning_steps=10)
+    a = Dyna_Q_Agent(planning_steps=10)
     a.update_model(0,2,1,1)
     a.update_model(2,0,1,1)
     a.update_model(0,3,0,1)
@@ -104,7 +104,7 @@ def test_planning_step():
     assert np.all(np.isclose(expected_q_values, list(a.q_values.values())[:3])) 
 
 def test_agent_start_step_end():
-    a = Agent(planning_steps=4)
+    a = Dyna_Q_Agent(planning_steps=4)
 
     # ----------------
     # test agent start

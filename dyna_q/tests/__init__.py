@@ -1,1 +1,1 @@
-from package import Env, Agent
+from package import Env, Agent, Dyna_Q_Agent
