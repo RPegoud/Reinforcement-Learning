@@ -94,7 +94,7 @@ def test_planning_step():
         2: {0: (1,1)},
     }
 
-    assert expected_model == a.model
+    assert a.model == expected_model
 
     a.planning_step()
     expected_q_values = [np.array([0.    , 0.    , 0.1271, 0.2   ], dtype=np.float32),
@@ -103,14 +103,15 @@ def test_planning_step():
 
     assert np.all(np.isclose(expected_q_values, list(a.q_values.values())[:3])) 
 
-def test_agent_start_step_stop():
-    a = Agent(planning_steps=2)
+def test_agent_start_step_end():
+    a = Agent(planning_steps=4)
 
     # ----------------
     # test agent start
     # ----------------
     action = a.agent_start(a.start_position)
     assert action == 3
+    assert a.position == 6
     assert a.model == {}
     for action_values in list(a.q_values.values()):
         assert np.all(action_values == 0)
@@ -120,8 +121,40 @@ def test_agent_start_step_stop():
     # ----------------
     action = a.step(a.position, a.env.get_reward(a.state_to_coord(a.position)))
     assert action == 1
-    assert a.position == 6
+    assert a.position == 16
+    action = a.step(a.position, a.env.get_reward(a.state_to_coord(a.position)))
+    assert action == 0
+    assert a.position == 15
+    action = a.step(a.position, a.env.get_reward(a.state_to_coord(a.position)))
+    assert action == 2
+    assert a.position == 16
 
-    expected_model = {
-        61: {3: (1,2)},
-    }
+    expected_model = {16: {3: (6, 0.0), 0: (15, 0.0)}, 
+                      6: {1: (16, 0.0)}}
+    assert a.model ==  expected_model
+    
+    for action_values in list(a.q_values.values()):
+        assert np.all(action_values == 0)
+
+    # ----------------
+    # test agent end
+    # ----------------
+    # test the final update with a reward
+    a.update_state(111, 3)
+    a.agent_end()
+    
+    expected_q_values = np.array([0.  , 0.  , 0.19, 0.  ], dtype=np.float32)
+    assert np.all(a.q_values.get(15) == expected_q_values)
+
+
+def test_portal():
+    a = Agent()
+    assert a.position == 16
+    a.update_state(107, 0)
+    assert a.position == 110
+    a.update_state(96, 1)
+    assert a.position == 110
+    a.update_state(105, 2)
+    assert a.position == 110
+    a.update_state(116, 3)
+    assert a.position == 110
