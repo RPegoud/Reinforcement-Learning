@@ -97,8 +97,11 @@ def test_planning_step():
 
     assert np.all(np.isclose(expected_q_values, list(a.q_values.values())[:3])) 
 
-def test_agent_start_step_end():
-    a = Dyna_Q_Agent(planning_steps=4)
+def test_agent_start_step_end(planning_steps=4, 
+                              epsilon=0.1, 
+                              gamma=1, 
+                              step_size=0.1):
+    a = Dyna_Q_Agent(planning_steps=4, epsilon=0)
 
     # ----------------
     # test agent start
@@ -137,8 +140,8 @@ def test_agent_start_step_end():
     a.update_state(111, 3)
     a.agent_end()
     
-    expected_q_values = np.array([0.  , 0.  , 0.19, 0.  ], dtype=np.float32)
-    # assert np.all(a.q_values.get(15) == expected_q_values)
+    expected_q_values = np.array([0.  , 0.  , 0.271, 0.  ], dtype=np.float32)
+    assert np.all(a.q_values.get(15) == expected_q_values)
 
 
 def test_portal():

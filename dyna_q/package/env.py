@@ -14,19 +14,19 @@ class Env():
         self.generate_grid()
         self.generate_reward_map()
 
-    def generate_grid(self):
+    def generate_grid(self) -> pd.DataFrame:
         grid = np.zeros((8, 12), dtype=np.object0)
         for key in list(self.coordinates.keys()):
             for values in self.coordinates[key]:
                 grid[values] = key
         self.grid = pd.DataFrame(grid)
 
-    def generate_reward_map(self):
+    def generate_reward_map(self) -> pd.DataFrame:
         reward_map = np.zeros((8, 12), dtype=np.float32)
         reward_map[self.coordinates['G'][0]] = 1
         self.reward_map = pd.DataFrame(reward_map)
 
-    def get_reward(self, coordinates: tuple = None, reverse:bool=True):
+    def get_reward(self, coordinates: tuple = None, reverse:bool=True) -> int:
         """
         Queries the reward map and returns the reward associated to the coordinates
         @reverse: - if the coordinates are derived from the agent state, set reverse to True

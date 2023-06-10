@@ -3,7 +3,7 @@ from package import Env
 
 class Agent():
     def __init__(self,
-                 gamma: float = 1.0,  # undiscounted task
+                 gamma: float = 0.1,  # undiscounted task
                  step_size: float = 0.1,
                  epsilon: float = 0.1,
                  ) -> None:
@@ -16,12 +16,18 @@ class Agent():
         self.last_action = -1
         self.last_state = -1
         self.n_states = self.env.grid.size
-        self.start_position = self.coord_to_state(
-            list(reversed(self.env.coordinates.get('A')[0])))
+        self.start_position = self.coord_to_state(self.env.coordinates.get('A')[0][::-1])
         self.position = self.start_position
         self.q_values = self.init_q_values()
         self.random_generator = np.random.RandomState(seed=17)
         self.done = False
+        self.n_steps = []
+
+    def reset(self):
+        self.done = False
+        self.position = self.start_position
+        self.last_action = -1
+        self.last_state = -1
 
     def coord_to_state(self, coordinates: tuple) -> int:
         return coordinates[0]*10 + coordinates[1]
@@ -64,11 +70,9 @@ class Agent():
         # /!\ when parsing the dataframe x and y are reversed
         # if the agent bumps into a wall
         if self.env.grid.loc[y, x] == 'W':
-            print('W')
             return coord
         # if the agent goes through the portal
         if self.env.grid.loc[y, x] == 'P':
-            print('P')
             return (11, 0)
         # if the agent encounters a terminal state (whole or goal)
         if self.env.grid.loc[y, x] in ['T', 'G']:
@@ -77,7 +81,7 @@ class Agent():
         self.position == (x, y)
         return (x, y)
 
-    def update_state(self, state, action):
+    def update_state(self, state, action) -> int:
         assert action in [0, 1, 2, 3], f"Invalid action: {action}, should be in {[i for i in range(4)]}"
         coord = self.state_to_coord(state)
         updated_coord = self.update_coord(coord, action)
