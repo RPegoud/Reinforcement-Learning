@@ -1,12 +1,7 @@
-from package import Agent, Env
+from package import Q_learning_Agent
 import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
-import seaborn as sns
-import plotly.express as px
-from tqdm.auto import tqdm
 
-class Dyna_Q_Agent(Agent):
+class Dyna_Q_Agent(Q_learning_Agent):
     def __init__(self, 
                  gamma: float = 1, 
                  step_size: float = 0.1, 
@@ -15,6 +10,7 @@ class Dyna_Q_Agent(Agent):
         super().__init__(gamma, step_size, epsilon)
         self.planning_steps = planning_steps
         self.model = {}  # model[state][action] = (new state, reward)
+        self.name = "Dyna Q"    
 
     def update_model(self, last_state: int, last_action: int, state: int, reward: int) -> None:
         """
@@ -23,6 +19,7 @@ class Dyna_Q_Agent(Agent):
         """
         try:
             self.model[last_state][last_action] = (state, reward)
+            self.state_visits[last_state] += 1
         except KeyError:
             self.model[last_state] = {}
             self.model[last_state][last_action] = (state, reward)
@@ -53,6 +50,9 @@ class Dyna_Q_Agent(Agent):
                     self.q_values[planning_state][planning_action] = update
 
     def step(self, state: int, reward: int) -> None:
+        """
+        A step performed by the agent
+        """
         # direct RL update
         update = self.q_values[self.past_state][self.past_action]
         update += self.step_size * \
@@ -84,41 +84,7 @@ class Dyna_Q_Agent(Agent):
         self.q_values[self.past_state][self.past_action] = update
         # model update with next_action = -1
         self.update_model(self.past_state, self.past_action, -1, reward)
+        self.state_visits[self.past_state] += 1
         # planning step
         self.planning_step()
-    
-    def play_episode(self) -> None:
-        self.agent_start(self.start_position)
-        episode_steps = 1
-        while not self.done:
-            self.step(self.position, 
-                      self.env.get_reward(self.state_to_coord(self.position)))
-            episode_steps+=1
-        self.n_steps.append(episode_steps)
-        self.agent_end()
-        self.reset()
-    
-    def fit(self, n_episode) -> None:
-        self.episode_played = 0
-        for _ in tqdm(range(n_episode), position=0, leave=True):
-            self.play_episode()
-            self.episode_played +=1
-            # self.epsilon = 
         
-    def get_value_map(self) -> pd.DataFrame:
-        key_val = [(self.state_to_coord(key)[::-1], np.max(values)) \
-            for (key, values) in list(self.q_values.items())]
-        value_map = pd.DataFrame(np.zeros((8,12)))
-        for key, value in key_val:
-            value_map.loc[key] = value
-        return value_map
-    
-    def report(self):
-        sns.heatmap(self.get_value_map(), cmap='viridis')
-        plt.title('State Value function')
-        plt.show()
-
-        n_steps = pd.DataFrame(self.n_steps)
-        n_steps['is_optimal'] = n_steps == 15
-        fig = px.bar(n_steps, color='is_optimal', title='Number of steps per episode')
-        fig.show()

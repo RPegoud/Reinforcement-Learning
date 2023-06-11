@@ -4,12 +4,12 @@ import numpy as np
 class Env():
     def __init__(self) -> None:
         self.coordinates = {
-            'A': ((6, 1),),
-            'W': ((3, range(3)), (range(5, 8), 3)),
-            'T': ((range(3), 8), (3, range(8, 12))),
-            'P': ((6, 10), (0, 11)),
-            'LP': ((1, 2),),
-            'G': ((1, 10),)
+            'A': ((6, 1),), # agent start position
+            'W': ((3, range(3)), (range(5, 8), 3)), # wall
+            'T': ((range(3), 8), (3, range(8, 12))), # trap
+            'P': ((6, 10), (0, 11)), # portal
+            'LP': ((1, 2),), # late portal
+            'G': ((2, 9),) # goal
         }
         self.generate_grid()
         self.generate_reward_map()
@@ -20,6 +20,10 @@ class Env():
             for values in self.coordinates[key]:
                 grid[values] = key
         self.grid = pd.DataFrame(grid)
+
+    def activate_late_portal(self):
+        late_portal_coord = self.coordinates.get('LP')[0]
+        self.grid.loc[late_portal_coord] = 'P'
 
     def generate_reward_map(self) -> pd.DataFrame:
         reward_map = np.zeros((8, 12), dtype=np.float32)
