@@ -61,7 +61,7 @@ def test_update_state_movement():
     assert a.update_state(46, 3) == 46
     # test termination on reaching the goal
     assert a.done is False
-    a.update_state(91, 1)
+    a.update_state(91, 2)
     assert a.done is True
     # test termination on wholes
     a.done = False
@@ -141,7 +141,7 @@ def test_agent_start_step_end(planning_steps=4,
     # test agent end
     # ----------------
     # test the final update with a reward
-    a.update_state(111, 3)
+    a.update_state(102, 3)
     a.agent_end()
 
     expected_q_values = np.array([0., 0., 0.271, 0.], dtype=np.float32)

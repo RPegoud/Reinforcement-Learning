@@ -4,7 +4,7 @@ from package import Env
 
 class Agent():
     def __init__(self,
-                 gamma: float = 0.1,  # undiscounted task
+                 gamma: float = 0.1,
                  step_size: float = 0.1,
                  epsilon: float = 0.1,
                  ) -> None:
