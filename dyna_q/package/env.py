@@ -1,15 +1,16 @@
 import pandas as pd
 import numpy as np
 
+
 class Env():
     def __init__(self) -> None:
         self.coordinates = {
-            'A': ((6, 1),), # agent start position
-            'W': ((3, range(3)), (range(5, 8), 3)), # wall
-            'T': ((range(3), 8), (3, range(8, 12))), # trap
-            'P': ((6, 10), (0, 11)), # portal
-            'LP': ((1, 2),), # late portal
-            'G': ((2, 9),) # goal
+            'A': ((6, 1),),  # agent start position
+            'W': ((3, range(3)), (range(5, 8), 3)),  # wall
+            'T': ((range(3), 8), (3, range(8, 12))),  # trap
+            'P': ((6, 10), (0, 11)),  # portal
+            'LP': ((1, 2),),  # late portal
+            'G': ((2, 9),)  # goal
         }
         self.generate_grid()
         self.generate_reward_map()
@@ -30,14 +31,16 @@ class Env():
         reward_map[self.coordinates['G'][0]] = 1
         self.reward_map = pd.DataFrame(reward_map)
 
-    def get_reward(self, coordinates: tuple = None, reverse:bool=True) -> int:
+    def get_reward(self, coordinates: tuple = None, reverse: bool = True) -> int:
         """
         Queries the reward map and returns the reward associated to the coordinates
         @reverse: - if the coordinates are derived from the agent state, set reverse to True
-                    They have to be reversed before querying the dataframe as 
+                    They have to be reversed before querying the dataframe as
                     agent(state) = (x,y) = pd.Dataframe.loc(y,x) with (x,y) = (col, row)
                   - if the coordinates come from env.coordinates, then set reverse to False
                     as they are already in the (row, col) format
         """
-        if reverse: return self.reward_map.loc[coordinates[::-1]]
-        else: return self.reward_map.loc[coordinates]
+        if reverse:
+            return self.reward_map.loc[coordinates[::-1]]
+        else:
+            return self.reward_map.loc[coordinates]
