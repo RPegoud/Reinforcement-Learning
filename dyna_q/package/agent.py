@@ -1,10 +1,10 @@
 import numpy as np
-from package import Env
+from package.env import Env
 
 
 class Agent():
     def __init__(self,
-                 gamma: float = 0.1,
+                 gamma: float = 0.1,  # undiscounted task
                  step_size: float = 0.1,
                  epsilon: float = 0.1,
                  ) -> None:
@@ -24,6 +24,7 @@ class Agent():
         self.random_generator = np.random.RandomState(seed=17)
         self.done = False
         self.n_steps = []
+        self.rewards = []
 
     def reset(self):
         self.done = False
@@ -85,16 +86,18 @@ class Agent():
             return (11, 0)
         # if the agent encounters falls into a trao
         if self.env.grid.loc[y, x] == 'T':
+            self.rewards.append(0)
             self.done = True
         # if the agent finds the treasure
         if self.env.grid.loc[y, x] == 'G':
+            self.rewards.append(1)
             self.done = True
 
         self.position == (x, y)
         return (x, y)
 
     def update_state(self, state, action) -> int:
-        assert action in [0, 1, 2, 3], f"Invalid action: {action}, should be in \
+        assert action in [0, 1, 2, 3], f"Invalid action: {action}, should be in\
             {[i for i in range(4)]}"
         coord = self.state_to_coord(state)
         updated_coord = self.update_coord(coord, action)
@@ -108,8 +111,8 @@ class Agent():
         Selects the index of the highest action value
         Breaks ties randomly
         """
-        return self.random_generator.choice(np.flatnonzero(action_values ==
-                                                           np.max(action_values)))
+        return self.random_generator.choice(np.flatnonzero(
+            action_values == np.max(action_values)))
 
     def epsilon_greedy(self, state) -> int:
         """

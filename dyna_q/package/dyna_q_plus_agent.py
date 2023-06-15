@@ -6,8 +6,8 @@ class Dyna_Q_plus_Agent(Dyna_Q_Agent):
     """
     In Dyna-Q+, a bonus reward is given for actions that haven't been tried for a long time
     as there are greater chances that the environment dynamics have changed
-    The number of transitions since the last time (state, action) was tried is
-    given by tau(state, action)
+    The number of transitions since the last time (state, action)
+    was tried is given by tau(state, action)
     The associated reward is given by: reward + kappa * sqrt(tau(state, action))
     """
     def __init__(self,
@@ -25,9 +25,9 @@ class Dyna_Q_plus_Agent(Dyna_Q_Agent):
     def update_model(self, last_state: int, last_action: int, state: int, reward: int) -> None:
         """
         Overwrite the Dyna-Q update_model function
-        Now, when we visit a state for the first time,
-        all the action that were not selected are initialized with 0,
-        they will be updated at each time steps according to the Dyna-Q+ algorithm
+        Now, when we visit a state for the first time, all the action that were not selected
+        are initialized with 0, they will be updated at each time steps
+        according to the Dyna-Q+ algorithm
         """
         if last_state not in self.model:
             self.model[last_state] = {last_action: (state, reward)}
@@ -53,7 +53,7 @@ class Dyna_Q_plus_Agent(Dyna_Q_Agent):
             planning_state = self.random_generator.choice(list(self.model.keys()))
             # select a recorded action
             planning_action = self.random_generator.choice(
-                                    list(self.model[planning_state].keys()))
+                list(self.model[planning_state].keys()))
             # get the predicted next state and reward
             next_state, reward = self.model[planning_state][planning_action]
             # add the bonus reward
@@ -78,8 +78,7 @@ class Dyna_Q_plus_Agent(Dyna_Q_Agent):
         """
         # direct RL update
         update = self.q_values[self.past_state][self.past_action]
-        update += self.step_size * \
-            (reward + self.gamma * np.max(self.q_values[state]) - update)
+        update += self.step_size * (reward + self.gamma * np.max(self.q_values[state]) - update)
         self.q_values[self.past_state][self.past_action] = update
         # model update
         self.update_model(self.past_state, self.past_action, state, reward)

@@ -31,8 +31,7 @@ class Dyna_Q_Agent(Q_learning_Agent):
         """
         for _ in range(self.planning_steps):
             # select a visited state
-            planning_state = self.random_generator.choice(
-                list(self.model.keys()))
+            planning_state = self.random_generator.choice(list(self.model.keys()))
             # select a recorded action
             planning_action = self.random_generator.choice(
                 list(self.model[planning_state].keys()))
@@ -56,8 +55,7 @@ class Dyna_Q_Agent(Q_learning_Agent):
         """
         # direct RL update
         update = self.q_values[self.past_state][self.past_action]
-        update += self.step_size * \
-            (reward + self.gamma * np.max(self.q_values[state]) - update)
+        update += self.step_size * (reward + self.gamma * np.max(self.q_values[state]) - update)
         self.q_values[self.past_state][self.past_action] = update
         # model update
         self.update_model(self.past_state, self.past_action, state, reward)
