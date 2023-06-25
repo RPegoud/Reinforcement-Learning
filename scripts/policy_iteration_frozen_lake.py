@@ -72,7 +72,9 @@ def policy_evaluation(p, n_states, policy, gamma, epsilon, max_iter=100):
             transitions = p[state][action]
             for transition in transitions:
                 prob, s_prime, reward, _ = transition
-                new_value_function[state] += prob*(reward + gamma*value_function[s_prime])
+                new_value_function[state] += prob * (
+                    reward + gamma * value_function[s_prime]
+                )
         # check for convergence
         # update the value function with and increment the iteration counter
         error = np.max(np.abs(new_value_function - value_function))
@@ -106,12 +108,11 @@ def policy_improvement(p, n_states, n_actions, value_from_policy, gamma):
         for action in range(n_actions):
             transitions = p[state][action]
             for transition in transitions:
-
                 prob, s_prime, reward, done = transition
                 # get Vpi for the next state s'
                 old_estimate = value_from_policy[s_prime]
                 # estimate the q value for the current action
-                q_values[action] += prob*(reward + gamma*old_estimate)
+                q_values[action] += prob * (reward + gamma * old_estimate)
         # make the policy greedy with regards to the q values
         best_action = np.argmax(q_values)
         new_policy[state] = best_action
@@ -120,11 +121,13 @@ def policy_improvement(p, n_states, n_actions, value_from_policy, gamma):
 
 
 if __name__ == "__main__":
-    env = gym.make('FrozenLake8x8-v1')
+    env = gym.make("FrozenLake8x8-v1")
     n_states = env.observation_space.n
     n_actions = env.action_space.n
     p = env.P
-    value_function, policy = policy_iteration(p, n_states, n_actions, gamma=0.999, epsilon=1e-5)
-    print(f'Value function: {value_function}')
-    print(f'Policy: {policy}')
+    value_function, policy = policy_iteration(
+        p, n_states, n_actions, gamma=0.999, epsilon=1e-5
+    )
+    print(f"Value function: {value_function}")
+    print(f"Policy: {policy}")
     sns.heatmap(pd.DataFrame(value_function.reshape(8, -1)))
